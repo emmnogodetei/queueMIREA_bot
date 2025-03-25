@@ -16,6 +16,7 @@ import (
 func Start(ctx context.Context, tgbot *bot.Bot, update *models.Update) {
 	tgbot.SendMessage(ctx, &bot.SendMessageParams{
 		ChatID: update.Message.Chat.ID,
+		MessageThreadID: update.Message.MessageThreadID,
 		Text:   "Hi! I am a bot for forming queues in chats.",
 	})
 }
@@ -28,6 +29,7 @@ func CreateQueue(ctx context.Context, tgbot *bot.Bot, update *models.Update) {
 	}
 	_, err := tgbot.SendMessage(ctx, &bot.SendMessageParams{
 		ChatID: update.Message.Chat.ID,
+		MessageThreadID: update.Message.MessageThreadID,
 		Text:   text,
 	})
 	if err != nil {
@@ -44,6 +46,7 @@ func DeleteQueue(ctx context.Context, tgbot *bot.Bot, update *models.Update) {
 	}
 	_, err := tgbot.SendMessage(ctx, &bot.SendMessageParams{
 		ChatID: update.Message.Chat.ID,
+		MessageThreadID: update.Message.MessageThreadID,
 		Text:   text,
 	})
 	if err != nil {
@@ -69,6 +72,7 @@ func GetQueue(ctx context.Context, tgbot *bot.Bot, update *models.Update) {
 	}
 	_, err := tgbot.SendMessage(ctx, &bot.SendMessageParams{
 		ChatID: update.Message.Chat.ID,
+		MessageThreadID: update.Message.MessageThreadID,
 		Text:   text,
 	})
 	if err != nil {
@@ -91,6 +95,7 @@ func ShuffleQueue(ctx context.Context, tgbot *bot.Bot, update *models.Update){
 
 	_, err := tgbot.SendMessage(ctx, &bot.SendMessageParams{
 		ChatID: update.Message.Chat.ID,
+		MessageThreadID: update.Message.MessageThreadID,
 		Text:   text,
 	})
 	if err != nil {
