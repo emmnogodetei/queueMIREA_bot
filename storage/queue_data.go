@@ -5,45 +5,43 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-var queses_db *sql.DB
-
-func createTables() error{
-	q := `CREATE TABLE IF NOT EXISTS queue_members(
-	id INTEGER PRIMARY KEY AUTOINCREMENT,
-	chat_id INTEGER,
-	topic_id INTEGER,
-	user_id INTEGER,
-	flname TEXT,
-	username TEXT,
-	priority INTEGER DEFAULT 0)`
-
-	_, err := queses_db.Exec(q) 
-	
-	return err
-}
+var queues_db *sql.DB
 
 func Init() {
 	var err error
-	queses_db, err = sql.Open("sqlite3", "storage/queses.db")
-	if err != nil{
-		panic(err)
-	}
-	//defer queses_db.Close()
-
-	err = queses_db.Ping()
+	queues_db, err = sql.Open("sqlite3", "storage/queues.db")
 	if err != nil{
 		panic(err)
 	}
 
-	if err = createTables(); err != nil{
+	err = queues_db.Ping()
+	if err != nil{
+		panic(err)
+	}
+
+	q := `CREATE TABLE IF NOT EXISTS queue_members(
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		chat_id INTEGER,
+		topic_id INTEGER,
+		user_id INTEGER,
+		flname TEXT,
+		username TEXT,
+		priority INTEGER DEFAULT 0)`
+	
+	_, err = queues_db.Exec(q) 
+
+	if err != nil{
 		panic(err)
 	}
 }
 
 func Add(chatID, topicID, userID int64, flname, username string, priority int) error{
 	q := `INSERT INTO queue_members (chat_id, topic_id, user_id, flname, username, priority)
-	VALUES (?, ?, ?, ?, ?, ?)`
-	_, err := queses_db.Exec(q, chatID, topicID, userID, flname, username, priority)
+	SELECT ?, ?, ?, ?, ?, ?
+	WHERE NOT EXISTS(
+		SELECT 1 FROM queue_members
+		WHERE chat_id = ? AND topic_id = ? AND user_id = ?)`
+	_, err := queues_db.Exec(q, chatID, topicID, userID, flname, username, priority, chatID, topicID, userID)
 
 	return err
 }
@@ -73,7 +71,7 @@ func Pop(chatID , topicID int64) error{
 		LIMIT 1)`
 
 
-	_, err := queses_db.Exec(q,chatID, topicID)
+	_, err := queues_db.Exec(q,chatID, topicID)
 
 	return err
 }
@@ -82,7 +80,7 @@ func Remove(chatID, topicID int64) error{
 	q := `DELETE FROM queue_members
 	WHERE chat_id = ? AND topic_id = ?`
 
-	_, err := queses_db.Exec(q,chatID, topicID)
+	_, err := queues_db.Exec(q,chatID, topicID)
 
 	return err
 }
@@ -92,7 +90,7 @@ func RemovePersone(chatID, topicID, userID int64) error{
 	DELETE FROM	queue_members
 	WHERE chat_id = ? AND topic_id = ? AND user_id = ?
 	`
-	_, err := queses_db.Exec(q,chatID,topicID,userID)
+	_, err := queues_db.Exec(q,chatID,topicID,userID)
 	return err
 }
 
@@ -104,7 +102,7 @@ func Get(chatID, topicID int64)([]string, error){
 		ORDER BY id ASC
 		`
 
-	rows, err := queses_db.Query(q, chatID, topicID)
+	rows, err := queues_db.Query(q, chatID, topicID)
 	if err != nil{
 		return nil, err
 	}

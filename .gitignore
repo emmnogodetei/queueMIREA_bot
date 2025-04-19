@@ -1,3 +1,4 @@
 *.sh
 main
 experiment_folder
+*.db
