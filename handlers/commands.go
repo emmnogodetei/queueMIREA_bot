@@ -88,10 +88,10 @@ func GetQueue(ctx context.Context, tgbot *bot.Bot, update *models.Update){
 		ChatID: update.Message.Chat.ID,
 		MessageThreadID: update.Message.MessageThreadID,
 		Text: text,
+		ReplyMarkup: buildKeyboard(),
 	})
 	if err != nil{
 		fmt.Printf("error sending message: %v\n", err)
 	}
 }
-
 

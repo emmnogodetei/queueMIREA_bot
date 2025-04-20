@@ -20,6 +20,8 @@ func Run(ctx context.Context, token string) error {
 	b.RegisterHandler(bot.HandlerTypeMessageText, "/remove", bot.MatchTypeExact, handlers.RemoveQueue)
 	b.RegisterHandler(bot.HandlerTypeMessageText, "/get", bot.MatchTypeExact, handlers.GetQueue)
 
+	b.RegisterHandler(bot.HandlerTypeCallbackQueryData, "btn_", bot.MatchTypePrefix, handlers.CallbackHandler)
+
 	b.Start(ctx)
 	return nil
 }
