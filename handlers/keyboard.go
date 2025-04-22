@@ -15,8 +15,12 @@ func buildKeyboard() models.ReplyMarkup {
 		InlineKeyboard: [][]models.InlineKeyboardButton{
 			{
 				{Text: "Удалить вершину", CallbackData: "btn_pop"},
-				{Text: "Удалить себя", CallbackData: "btn_removeMe"},
+			},{
+				{Text: "Удалить себя", CallbackData: "btn_removeMe"},				
+			},{
 				{Text: "Удалить это сообщение", CallbackData: "btn_delete"},
+			},{
+				{Text: "Обновить", CallbackData: "btn_update"},
 			},
 		},
 	}
@@ -37,6 +41,7 @@ func CallbackHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
 	var err error
 	var queue []string
 	switch update.CallbackQuery.Data {
+	case "btn_update":
 	case "btn_pop":
 		err = storage.Pop(
 			update.CallbackQuery.Message.Message.Chat.ID,
