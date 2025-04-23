@@ -54,7 +54,7 @@ func Pop(chatID , topicID int64) error{
 		WHERE chat_id = ? AND topic_id = ?
 		ORDER BY id ASC
 		LIMIT 1)`
-	if IsSorted[chatID][topicID]{
+	if IsSorted[chatID]!=nil && IsSorted[chatID][topicID]{
 		q = `DELETE FROM queue_members
 		WHERE id = (
 		SELECT id FROM queue_members
