@@ -3,12 +3,14 @@ package handlers
 import (
 	"context"
 	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/emmnogodetei/queueMIREA_bot/storage"
 	"github.com/go-telegram/bot"
 	"github.com/go-telegram/bot/models"
 )
+
 
 func Start(ctx context.Context, tgbot *bot.Bot, update *models.Update) {
 	tgbot.SendMessage(ctx, &bot.SendMessageParams{
@@ -18,8 +20,7 @@ func Start(ctx context.Context, tgbot *bot.Bot, update *models.Update) {
 	})
 }
 
-
-func AddToQueue(ctx context.Context, tgbot *bot.Bot, update *models.Update) {
+func AddDefault(ctx context.Context, tgbot *bot.Bot, update *models.Update) {
 	FLName := update.Message.From.FirstName + " " + update.Message.From.LastName 
 	
 	err := storage.Add(
@@ -36,26 +37,21 @@ func AddToQueue(ctx context.Context, tgbot *bot.Bot, update *models.Update) {
 	}
 }
 
-func RemoveFirst(ctx context.Context, tgbot *bot.Bot, update *models.Update){
-	err := storage.Pop(
-		update.Message.Chat.ID,
-		int64(update.Message.MessageThreadID),
-	)
+func AddWithPriority(ctx context.Context, tgbot *bot.Bot, update *models.Update){
+	FLName := update.Message.From.FirstName + " " + update.Message.From.LastName 
+	num, _ := strconv.Atoi(update.Message.Text[1:])
 
-	if err != nil {
-		fmt.Printf("error removing first")
-	}
-}
-
-func RemoveMe(ctx context.Context, tgbot *bot.Bot, update *models.Update){
-	err := storage.RemovePersone(
+	err := storage.Add(
 		update.Message.Chat.ID,
 		int64(update.Message.MessageThreadID),
 		update.Message.From.ID,
+		FLName,
+		update.Message.From.Username,
+		num,
 	)
-
-	if err != nil{
-		fmt.Printf("error removing persone: %v\n", err)
+	
+	if err != nil {
+		fmt.Printf("error adding to queue: %v\n", err)
 	}
 }
 
@@ -88,7 +84,7 @@ func GetQueue(ctx context.Context, tgbot *bot.Bot, update *models.Update){
 		ChatID: update.Message.Chat.ID,
 		MessageThreadID: update.Message.MessageThreadID,
 		Text: text,
-		ReplyMarkup: buildKeyboard(),
+		ReplyMarkup: buildKeyboard(update.Message.Chat.ID, int64(update.Message.MessageThreadID)),
 	})
 	if err != nil{
 		fmt.Printf("error sending message: %v\n", err)

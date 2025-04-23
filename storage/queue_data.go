@@ -2,10 +2,12 @@ package storage
 
 import (
 	"database/sql"
+
 	_ "github.com/mattn/go-sqlite3"
 )
 
 var queues_db *sql.DB
+var IsSorted = make(map[int64]map[int64]bool)
 
 func Init() {
 	var err error
@@ -46,29 +48,20 @@ func Add(chatID, topicID, userID int64, flname, username string, priority int) e
 }
 
 func Pop(chatID , topicID int64) error{
-	var q string
-	/*if STATE == "normal" {
-		q = `DELETE FROM queue_members
+	q := `DELETE FROM queue_members
 		WHERE id = (
 		SELECT id FROM queue_members
 		WHERE chat_id = ? AND topic_id = ?
-		ORDER BY joined_at ASC
+		ORDER BY id ASC
 		LIMIT 1)`
-	}else if STATE == "sorted"{
+	if IsSorted[chatID][topicID]{
 		q = `DELETE FROM queue_members
 		WHERE id = (
 		SELECT id FROM queue_members
-		WHERE chat_id = ? AND topic_id = ? AND priopity >= 1
-		ORDER BY prioriy ASC, joined_at ASC
+		WHERE chat_id = ? AND topic_id = ? AND priority >= 1
+		ORDER BY priority ASC, id ASC
 		LIMIT 1)`
-	}*/
-	q = `DELETE FROM queue_members
-		WHERE id = (
-		SELECT id FROM queue_members
-		WHERE chat_id = ? AND topic_id = ? AND priority = 0
-		ORDER BY id ASC
-		LIMIT 1)`
-
+	}
 
 	_, err := queues_db.Exec(q,chatID, topicID)
 
@@ -100,7 +93,15 @@ func Get(chatID, topicID int64)([]string, error){
 		WHERE chat_id = ? AND topic_id = ?
 		ORDER BY id ASC
 		`
-
+	if IsSorted[chatID]!=nil &&IsSorted[chatID][topicID]{
+		q = `
+		SELECT flname
+		FROM queue_members
+		WHERE chat_id = ? AND topic_id = ? AND priority >= 1
+		ORDER BY priority ASC, id ASC
+		`
+	}
+	
 	rows, err := queues_db.Query(q, chatID, topicID)
 	if err != nil{
 		return nil, err

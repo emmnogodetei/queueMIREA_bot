@@ -10,22 +10,37 @@ import (
 	"github.com/go-telegram/bot/models"
 )
 
-func buildKeyboard() models.ReplyMarkup {
+
+
+func buildKeyboard(chatID ,topicID int64) models.ReplyMarkup {
+	if storage.IsSorted[chatID] == nil{
+		storage.IsSorted[chatID] = make(map[int64]bool)
+	}
 	kb := &models.InlineKeyboardMarkup{
 		InlineKeyboard: [][]models.InlineKeyboardButton{
 			{
-				{Text: "Удалить вершину", CallbackData: "btn_pop"},
+				{Text: "Обновить", CallbackData: "btn_update"},
 			},{
-				{Text: "Удалить себя", CallbackData: "btn_removeMe"},				
+				{Text: buttonText("Отсортировать",storage.IsSorted[chatID][topicID]),CallbackData: "btn_sort"},
+			},{
+				{Text: "Удалить вершину", CallbackData: "btn_pop"},			
+			},{
+				{Text: "Удалить себя", CallbackData: "btn_removeMe"},
 			},{
 				{Text: "Удалить это сообщение", CallbackData: "btn_delete"},
-			},{
-				{Text: "Обновить", CallbackData: "btn_update"},
 			},
 		},
 	}
 
 	return kb
+}
+
+func buttonText(text string, opt bool) string {
+	if opt {
+		return "✅ " + text
+	}
+
+	return "❌ " + text
 }
 
 func CallbackHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
@@ -42,6 +57,11 @@ func CallbackHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
 	var queue []string
 	switch update.CallbackQuery.Data {
 	case "btn_update":
+	case "btn_sort":
+		if storage.IsSorted[update.CallbackQuery.Message.Message.Chat.ID] == nil{
+			storage.IsSorted[update.CallbackQuery.Message.Message.Chat.ID] = make(map[int64]bool)
+		}
+		storage.IsSorted[update.CallbackQuery.Message.Message.Chat.ID][int64(update.CallbackQuery.Message.Message.MessageThreadID)] = !storage.IsSorted[update.CallbackQuery.Message.Message.Chat.ID][int64(update.CallbackQuery.Message.Message.MessageThreadID)]
 	case "btn_pop":
 		err = storage.Pop(
 			update.CallbackQuery.Message.Message.Chat.ID,
@@ -83,7 +103,7 @@ func CallbackHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
 		ChatID: update.CallbackQuery.Message.Message.Chat.ID,
 		MessageID: update.CallbackQuery.Message.Message.ID,
 		Text: text,
-		ReplyMarkup: buildKeyboard(),
+		ReplyMarkup: buildKeyboard(update.CallbackQuery.Message.Message.Chat.ID, int64(update.CallbackQuery.Message.Message.MessageThreadID)),
 	})
 
 	if err != nil{
