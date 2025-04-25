@@ -11,7 +11,7 @@ import (
 )
 
 func main() {
-	token := os.Getenv("TELEGRAM_API_TOKEN2")
+	token := os.Getenv("TELEGRAM_API_TOKEN1")
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt)
 	defer cancel()
 

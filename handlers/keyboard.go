@@ -58,11 +58,17 @@ func CallbackHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
 	switch update.CallbackQuery.Data {
 	case "btn_update":
 	case "btn_sort":
+		if !IsAdmin(ctx, b, update.CallbackQuery.Message.Message.Chat.ID, update.CallbackQuery.From.ID){
+			return
+		}
 		if storage.IsSorted[update.CallbackQuery.Message.Message.Chat.ID] == nil{
 			storage.IsSorted[update.CallbackQuery.Message.Message.Chat.ID] = make(map[int64]bool)
 		}
 		storage.IsSorted[update.CallbackQuery.Message.Message.Chat.ID][int64(update.CallbackQuery.Message.Message.MessageThreadID)] = !storage.IsSorted[update.CallbackQuery.Message.Message.Chat.ID][int64(update.CallbackQuery.Message.Message.MessageThreadID)]
 	case "btn_pop":
+		if !IsAdmin(ctx, b, update.CallbackQuery.Message.Message.Chat.ID, update.CallbackQuery.From.ID){
+			return
+		}
 		err = storage.Pop(
 			update.CallbackQuery.Message.Message.Chat.ID,
 			int64(update.CallbackQuery.Message.Message.MessageThreadID),
@@ -74,6 +80,9 @@ func CallbackHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
 			update.CallbackQuery.From.ID,
 		)
 	case "btn_delete":
+		if !IsAdmin(ctx, b, update.CallbackQuery.Message.Message.Chat.ID, update.CallbackQuery.From.ID){
+			return
+		}
 		b.DeleteMessage(ctx, &bot.DeleteMessageParams{
 			ChatID:    update.CallbackQuery.Message.Message.Chat.ID,
 			MessageID: update.CallbackQuery.Message.Message.ID,

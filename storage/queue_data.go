@@ -40,9 +40,12 @@ func Init() {
 func Add(chatID, topicID, userID int64, flname, username string, priority int) error{
 	q := `
 	INSERT INTO queue_members (chat_id, topic_id, user_id, flname, username, priority)
-	VALUES(?, ?, ?, ?, ?, ?)
+	SELECT ?, ?, ?, ?, ?, ?
+	WHERE NOT EXISTS(
+		SELECT 1 FROM queue_members
+		WHERE chat_id = ? AND topic_id = ? AND user_id = ?)
 	`
-	_, err := queues_db.Exec(q, chatID, topicID, userID, flname, username, priority)
+	_, err := queues_db.Exec(q, chatID, topicID, userID, flname, username, priority,chatID, topicID, userID)
 
 	return err
 }

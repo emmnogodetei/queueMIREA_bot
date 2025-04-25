@@ -56,6 +56,9 @@ func AddWithPriority(ctx context.Context, tgbot *bot.Bot, update *models.Update)
 }
 
 func RemoveQueue(ctx context.Context, tgbot *bot.Bot, update *models.Update) {
+	if !IsAdmin(ctx,tgbot, update.Message.Chat.ID, update.Message.From.ID){
+		return
+	}
 	err := storage.Remove(
 		update.Message.Chat.ID,
 		int64(update.Message.MessageThreadID),
