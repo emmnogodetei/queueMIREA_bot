@@ -11,7 +11,7 @@ import (
 )
 
 
-
+// buildKeyboard отображает встроенную клавиатуру
 func buildKeyboard(chatID ,topicID int64) models.ReplyMarkup {
 	if storage.IsSorted[chatID] == nil{
 		storage.IsSorted[chatID] = make(map[int64]bool)
@@ -35,6 +35,7 @@ func buildKeyboard(chatID ,topicID int64) models.ReplyMarkup {
 	return kb
 }
 
+// buttonText обрабатывает и выводит текст определенных кнопок 
 func buttonText(text string, opt bool) string {
 	if opt {
 		return "✅ " + text
@@ -43,6 +44,7 @@ func buttonText(text string, opt bool) string {
 	return "❌ " + text
 }
 
+// CallbackHandler обрабатывает кнопки встроенной клавиатуры
 func CallbackHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
 	// answering callback query first to let Telegram know that we received the callback query,
 	// and we're handling it. Otherwise, Telegram might retry sending the update repetitively

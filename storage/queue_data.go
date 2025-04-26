@@ -1,3 +1,4 @@
+// Package storage содержит код, определяющий формат хранения и обработки данных
 package storage
 
 import (
@@ -9,6 +10,10 @@ import (
 var queues_db *sql.DB
 var IsSorted = make(map[int64]map[int64]bool)
 
+// Init инициализирует базу данных
+//   - Открывает базу данных
+//   - Соединяется с базой данных
+//   - Создает sql таблицы
 func Init() {
 	var err error
 	queues_db, err = sql.Open("sqlite3", "storage/queues.db")
@@ -37,6 +42,7 @@ func Init() {
 	}
 }
 
+// Add добавляет пользователя и его данные в таблицу
 func Add(chatID, topicID, userID int64, flname, username string, priority int) error{
 	q := `
 	INSERT INTO queue_members (chat_id, topic_id, user_id, flname, username, priority)
@@ -50,6 +56,7 @@ func Add(chatID, topicID, userID int64, flname, username string, priority int) e
 	return err
 }
 
+// Pop первую строку таблицы
 func Pop(chatID , topicID int64) error{
 	q := `DELETE FROM queue_members
 		WHERE id = (
@@ -71,6 +78,7 @@ func Pop(chatID , topicID int64) error{
 	return err
 }
 
+// Remove удалет всех пользователей чата из таблицы
 func Remove(chatID, topicID int64) error{
 	q := `DELETE FROM queue_members
 	WHERE chat_id = ? AND topic_id = ?`
@@ -80,6 +88,7 @@ func Remove(chatID, topicID int64) error{
 	return err
 }
 
+// RemovePersone удаляет строку с определенным пользователем чата
 func RemovePersone(chatID, topicID, userID int64) error{
 	q := `
 	DELETE FROM	queue_members
@@ -89,6 +98,7 @@ func RemovePersone(chatID, topicID, userID int64) error{
 	return err
 }
 
+// Get получает пользователей из таблицы
 func Get(chatID, topicID int64)([]string, error){
 	q := `
 		SELECT flname

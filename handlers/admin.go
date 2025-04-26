@@ -6,6 +6,7 @@ import (
 	"github.com/go-telegram/bot"
 )
 
+// IsAdmin проверяет, является ли пользователь администратором или нет 
 func IsAdmin(ctx context.Context, b *bot.Bot, chatID, userID int64) bool{
 	admins, err := b.GetChatAdministrators(ctx, &bot.GetChatAdministratorsParams{
 		ChatID: chatID,

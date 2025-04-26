@@ -1,3 +1,5 @@
+// Package filters содержит фильтры сообщений
+
 package filters
 
 import (
@@ -7,6 +9,7 @@ import (
 	"github.com/go-telegram/bot/models"
 )
 
+// IsPlusWithPriority проверяет соответствует ли введенное сообщение формату (+)<число>
 func IsPlusWithPriority(update *models.Update) bool{
 	if update.Message == nil{
 		return false
